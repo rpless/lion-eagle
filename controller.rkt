@@ -1,7 +1,6 @@
 #lang racket
 
-(require (for-syntax syntax/parse racket)
-         "utilities.rkt")
+(require (for-syntax syntax/parse racket "utilities.rkt"))
 
 ;; Controller Module
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -30,7 +29,6 @@
                            [i (syntax->datum #'(impl ...))])
                   #`(define/public (#,(datum->syntax stx a)) (#,i)))
              
-             ;; TODO: Notifiers for the view
              #,@(for/list ([s setters]
                            [g getters]
                            [f (syntax->datum #'(delegate ...))])
