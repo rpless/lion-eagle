@@ -12,7 +12,7 @@
 
 (define-syntax (define-controller stx)
   (syntax-parse stx
-    [(_ name:id [action:id impl] ... [delegate:id ...] [bind:id callback:expr] ...)
+    [(_ name:id [delegate:id ...] [action:id impl] ...)
      (define getters (map (curry symbol-append 'get-) (syntax->datum #'(delegate ...))))
      (define setters (map (curry symbol-append 'set-) (syntax->datum #'(delegate ...))))
      #`(begin 
@@ -33,11 +33,11 @@
                            [g getters]
                            [f (syntax->datum #'(delegate ...))])
                   #`(begin 
-                      (define #,(datum->syntax stx (symbol-append 'notifers: f)) 
-                        (list #,@(for/list ([b (syntax->datum #'(bind ...))]
-                                            [c (syntax-e #'(callback ...))]
-                                            #:when (equal? b f))
-                                   c)))
+                      (define #,(datum->syntax stx (symbol-append 'notifers: f)) '())
+                      
+                      (define/public (#,(datum->syntax stx (symbol-append 'add-notifer: f)) notifier)
+                        (set! #,(datum->syntax stx (symbol-append 'notifers: f))
+                              (cons notifier #,(datum->syntax stx (symbol-append 'notifers: f)))))
                       
                       (define/public (#,(datum->syntax stx s) value)
                         (set-field! #,(datum->syntax stx f) in:model value)

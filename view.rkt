@@ -10,4 +10,4 @@
 
 (define-syntax-class textfield
   #:description "UI Clause"
-  (pattern (textfield name:id (bind field:id func:expr))))
+  (pattern (textfield name:id (bind field:id ->textfield:expr textfield->:expr))))

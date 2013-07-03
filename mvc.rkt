@@ -17,18 +17,27 @@
      #`(let () 
          ;; Create the Model
          (define-model mname [#,@#`(field ...)])
-         (define foo (new mname #,@(for/list ([n (syntax->datum #'(field ...))]
+         (define mod (new mname #,@(for/list ([n (syntax->datum #'(field ...))]
                                               [v (syntax->datum #'(val ...))])
                                      #`[#,(datum->syntax stx n) #,(datum->syntax stx v)])))
+         
+         ;; Create the Controller
+         (define-controller #,controller-name 
+           [field ...]
+           [action (thunk (begin impl ...))] ...)
+         (define control (new #,controller-name [model mod]))
          
          ;; Create the View and binders
          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
          (define frame (new frame% [label ""]))
-         (define #,#'component.name (new text-field% [label ""] [parent frame]))
+         (define #,#'component.name (new text-field% [label ""]
+                                         [parent frame]
+                                         [callback (λ (self evt) (if (eq? (send evt get-event-type) 'text-field-enter)
+                                                                     (send control #,(datum->syntax stx (symbol-append 'set- (syntax->datum #'component.field)))
+                                                                           (#,#'component.textfield-> (send self get-value)))
+                                                                     (void)))]))
+         (send control #,(datum->syntax stx (symbol-append 'add-notifer: (syntax->datum #'component.field)))
+               (λ (new-value) (send #,#'component.name set-value (#,#'component.->textfield new-value))))
          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;                  
          
-         ;; Create the Controller
-         (define-controller #,controller-name [action (thunk (begin impl ...))] ... 
-           [field ...]
-           [#,#'component.field (λ (new-value) (send #,#'component.name set-value (#,#'component.func new-value)))])
-         (values (new #,controller-name [model foo]) frame))]))
+         (values control frame))]))
