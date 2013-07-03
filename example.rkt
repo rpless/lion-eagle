@@ -3,6 +3,6 @@
 
 (define-values (x view)
   (mvc (model foo [counter 5])
-       (view (frame (textfield f1 "" (bind counter number->string))))
+       (view (frame "MVC Test" (textfield t1 (bind counter number->string))))
        (controller (hello (displayln "Hello")
                           (displayln "World")))))
