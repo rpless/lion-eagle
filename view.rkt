@@ -15,7 +15,12 @@
 ;;   of [String -> X]
 ;; - (button name text (action actionname))
 (define-syntax (component stx)
-  (syntax-case stx (textfield button message bind action)
+  (syntax-case stx (frame textfield button message bind action)
+    [(_ control (frame name title comp ...))
+     #'(let () 
+         (define name (new frame% [label title]))
+         (component control name comp) ...
+         name)]
     [(_ control parentname (textfield name (bind field model->textfield textfield->model)))
      #`(begin 
          (define name (new text-field% [parent parentname]

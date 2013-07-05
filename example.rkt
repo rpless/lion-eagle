@@ -3,7 +3,7 @@
 
 (define-values (x view)
   (mvc (model foo [counter 0])
-       (view (frame "MVC Test"
+       (view (frame window "MVC Test"
                     (message m1 (bind counter number->string))
                     (textfield t1 (bind counter number->string string->number))
                     (button b1 "Click Me" (action hello))))

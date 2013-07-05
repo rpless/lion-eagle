@@ -11,7 +11,7 @@
 (define-syntax (mvc stx)
   (syntax-parse stx
     [(_ (model mname:id [field:id val] ...)
-        (view (frame title:expr comp ...))
+        (view ui)
         (controller (action:id impl:expr ...) ...))
      (define controller-name (datum->syntax stx (symbol-append (syntax->datum #'mname) '-controller)))
      #`(let () 
@@ -28,7 +28,6 @@
          (define control (new #,controller-name [model mod]))
          
          ;; Create the View and binders
-         (define parent (new frame% [label title]))
-         (component control parent comp) ...            
+         (define parent (component control ui))
          
          (values control parent))]))
