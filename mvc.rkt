@@ -22,9 +22,7 @@
                                      #`[#,(datum->syntax stx n) #,(datum->syntax stx v)])))
          
          ;; Create the Controller
-         (define-controller #,controller-name 
-           [field ...]
-           [action (thunk (begin impl ...))] ...)
+         (define-controller #,controller-name [field ...] [action (thunk (begin impl ...))] ...)
          (define control (new #,controller-name [model mod]))
          
          ;; Create the View and binders
