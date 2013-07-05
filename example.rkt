@@ -2,8 +2,8 @@
 (require "mvc.rkt" racket/gui/base)
 
 (define-values (x view)
-  (mvc (model foo [counter 5])
+  (mvc (model foo [counter 0])
        (view (frame "MVC Test"
-                    (textfield t1 (bind counter number->string string->number))))
-       (controller (hello (displayln "Hello")
-                          (displayln "World")))))
+                    (textfield t1 (bind counter number->string string->number))
+                    (button b1 "Click Me" (action hello))))
+       (controller (hello (send this set-counter (add1 (send this get-counter)))))))
