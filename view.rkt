@@ -26,6 +26,10 @@
      #`(begin 
          (define name (new horizontal-panel% [parent parentname]))
          (component control name comp)...)]
+    [(_ control parentname (vertical-panel name comp ...))
+     #`(begin 
+         (define name (new vertical-panel% [parent parentname]))
+         (component control name comp)...)]
     [(_ control parentname (textfield name (bind field model->textfield textfield->model)))
      #`(begin 
          (define name (new text-field% [parent parentname]
