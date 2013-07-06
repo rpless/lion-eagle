@@ -20,7 +20,7 @@
          (define mod (apply make-object mname x y))
          
          ;; Create the Controller
-         (define-controller #,controller-name [field ...] [action (thunk (begin impl ...))] ...)
+         (define-controller #,controller-name [field ...] [action (begin impl ...)] ...)
          (define control (new #,controller-name [model mod]))
 
          (values control (component control ui)))]))
