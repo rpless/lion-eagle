@@ -3,7 +3,7 @@
 
 
 (define create-mvc 
-  (mvc (model foo [counter])
+  (mvc (model foo [counter number?])
        (view (frame window "MVC Test"
                     (vertical-panel vp
                                     (horizontal-panel hp
