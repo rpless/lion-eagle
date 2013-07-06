@@ -10,22 +10,20 @@
 
 (define-syntax (mvc stx)
   (syntax-parse stx
-    [(_ (model mname:id [field:id val] ...)
+    [(_ (model mname:id [field:id] ...)
         (view ui)
         (controller (action:id impl:expr ...) ...))
      (define controller-name (datum->syntax stx (symbol-append (syntax->datum #'mname) '-controller)))
-     #`(let () 
+     #`(λ (x . y) 
          ;; Create the Model
          (define-model mname [#,@#`(field ...)])
-         (define mod (new mname #,@(for/list ([n (syntax->datum #'(field ...))]
+         (define mod (apply (curry make-object mname) (cons x y)))
+         #;(define mod (new mname #,@(for/list ([n (syntax->datum #'(field ...))]
                                               [v (syntax->datum #'(val ...))])
                                      #`[#,(datum->syntax stx n) #,(datum->syntax stx v)])))
          
          ;; Create the Controller
          (define-controller #,controller-name [field ...] [action (thunk (begin impl ...))] ...)
          (define control (new #,controller-name [model mod]))
-         
-         ;; Create the View and binders
-         (define parent (component control ui))
-         
-         (values control parent))]))
+
+         (values control (component control ui)))]))

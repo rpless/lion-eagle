@@ -17,4 +17,4 @@
          (class object% 
            (super-new)
            (inspect #f)
-           (init-field #,@#`(field ...))))]))  
+           (init-field #,@#`(field ...))))]))
