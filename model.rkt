@@ -11,8 +11,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define-syntax (define-model stx)
-  (syntax-parse stx
-    [(_ name:id [fieldid:id contract:expr] ...)
+  (syntax-case stx ()
+    [(_ name [fieldid contract] ...)
      #`(begin 
          (define/contract name
            (class/c 
