@@ -1,7 +1,7 @@
 #lang racket
 
 (require (for-syntax syntax/parse racket "utilities.rkt"))
-(require "model.rkt" "controller.rkt" "view.rkt" racket/gui/base)
+(require "model.rkt" "controller.rkt" "view.rkt")
 
 ;; MVC
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -17,10 +17,7 @@
      #`(λ (x . y) 
          ;; Create the Model
          (define-model mname [#,@#`(field ...)])
-         (define mod (apply (curry make-object mname) (cons x y)))
-         #;(define mod (new mname #,@(for/list ([n (syntax->datum #'(field ...))]
-                                              [v (syntax->datum #'(val ...))])
-                                     #`[#,(datum->syntax stx n) #,(datum->syntax stx v)])))
+         (define mod (apply make-object mname x y))
          
          ;; Create the Controller
          (define-controller #,controller-name [field ...] [action (thunk (begin impl ...))] ...)
