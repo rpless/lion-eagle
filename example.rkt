@@ -1,5 +1,5 @@
 #lang racket
-(require "mvc.rkt")
+(require "lion-eagle/main.rkt")
 
 
 (define create-mvc 
