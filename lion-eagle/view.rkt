@@ -1,6 +1,6 @@
 #lang racket
 
-(require (for-syntax racket "utilities.rkt")
+(require (for-syntax racket "private/utilities.rkt")
          racket/gui/base)
 
 ;; View Module

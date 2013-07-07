@@ -1,6 +1,6 @@
 #lang racket
 
-(require (for-syntax syntax/parse racket "utilities.rkt"))
+(require (for-syntax syntax/parse racket "private/utilities.rkt"))
 
 ;; Controller Module
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
