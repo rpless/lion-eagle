@@ -12,7 +12,7 @@
 
 (define-syntax (define-model stx)
   (syntax-case stx ()
-    [(_ name fields ...)
+    [(_ name (fields ...))
      #`(begin 
          (define/contract name
            (class/c 
