@@ -1,6 +1,6 @@
 #lang racket
 
-(require (for-syntax syntax/parse racket))
+(require (for-syntax syntax/parse racket "utilities.rkt"))
 
 ;; Model Module
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -12,14 +12,13 @@
 
 (define-syntax (define-model stx)
   (syntax-case stx ()
-    [(_ name [fieldid contract] ...)
+    [(_ name fields ...)
      #`(begin 
          (define/contract name
            (class/c 
-            (field #,@(for/list ([f (syntax->datum #'(fieldid ...))]
-                                 [c (syntax->datum #'(contract ...))])
-                        #`[#,f #,c])))
+            (field fields ...))
            (class object% 
              (super-new)
              (inspect #f)
-             (init-field #,@#`(fieldid ...)))))]))
+             (init-field #,@(map extract-id (syntax->datum #'(fields ...)))))))]))
+
