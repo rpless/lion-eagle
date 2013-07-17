@@ -1,15 +1,16 @@
 #lang racket
 
+(require (for-syntax racket))
+
 ;; Syntax Utilities
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (provide symbol-append extract-id)
 
-;; Symbol Symbol -> Symbol
+;; Symbol ..+ -> Symbol
 ;; Take a wild guess as to what this function does.
-(define (symbol-append s1 s2)
-  (string->symbol (string-append (symbol->string s1)
-                                 (symbol->string s2))))
+(define (symbol-append s . rst)
+  (string->symbol (apply string-append (map symbol->string (cons s rst)))))
 
 
 (define (extract-id stx)
@@ -23,4 +24,6 @@
 (module+ test
   (require rackunit)
   
-  (check-equal? (symbol-append 'foo 'bar) 'foobar))
+  (check-equal? (symbol-append 'foo) 'foo)
+  (check-equal? (symbol-append 'foo 'bar) 'foobar)
+  (check-equal? (symbol-append 'foo 'bar 'baz) 'foobarbaz))

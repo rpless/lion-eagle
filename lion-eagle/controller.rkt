@@ -26,7 +26,7 @@
              
              ;; actions
              #,@(for/list ([a (syntax->datum #'(action ...))]
-                           [i (syntax->datum #'(impl ...))])
+                           [i (syntax-e #'(impl ...))])
                   #`(define/public (#,(datum->syntax stx a)) #,i))
              
              #,@(for/list ([s setters]
