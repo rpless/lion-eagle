@@ -17,7 +17,8 @@
      (define controlled-fields (datum->syntax stx (map extract-id (syntax->datum #'(field-spec ...)))))
      #`(begin
          ;; Create the Model
-         (define-model mname (field-spec ...) (val ...))
+         (define-model mname (field-spec ...))
+         (define mod (apply mname val ...))
          (define control null)
          
          (component control ui)

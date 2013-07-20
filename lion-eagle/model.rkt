@@ -22,23 +22,25 @@
      (define internal-ids (map (compose (curry datum->syntax stx) (curry symbol-append 'in:) syntax->datum) ids))
      (define getters (map (compose (curry symbol-append 'get-) syntax->datum) ids))
      (define setters (map (λ (i) (symbol-append 'set- (syntax->datum i) '!)) ids))
-     (define contracts (map (lambda (stx)
-                              (syntax-case stx ()
-                                [(id contract) #'contract]
-                                [id #'any/c]))
+     (define contracts (map (case-lambda 
+                              [(id contract) #'contract]
+                              [(id) #'any/c])
                             (syntax->list #'(field-spec ...))))
-     #`(define/contract name
-         (class/c 
-          (init #,@(map (λ (id contract) #`(#,id #,contract)) ids contracts))
-          #,@(map (λ (id contract) #`(#,id (->m #,contract))) getters contracts)
-          #,@(map (λ (id contract) #`(#,id (->m #,contract any/c))) setters contracts))
-         (class object% 
-           (super-new)
-           (inspect #f)
-           (init #,@(map values ids))
-           #,@(map (λ (in i) #`(define #,in #,i)) internal-ids ids)
-           #,@(map (λ (g in)#`(define/public (#,g) #,in)) getters internal-ids)
-           #,@(map (λ (s in)#`(define/public (#,s val) (set! #,in val))) setters internal-ids)))]))
+     #`(define name
+         (let ()
+           (define/contract model
+             (class/c 
+              (init #,@(map (λ (id contract) #`(#,id #,contract)) ids contracts))
+              #,@(map (λ (id contract) #`(#,id (->m #,contract))) getters contracts)
+              #,@(map (λ (id contract) #`(#,id (->m #,contract any/c))) setters contracts))
+             (class object% 
+               (super-new)
+               (inspect #f)
+               (init #,@(map values ids))
+               #,@(map (λ (in i) #`(define #,in #,i)) internal-ids ids)
+               #,@(map (λ (g in)#`(define/public (#,g) #,in)) getters internal-ids)
+               #,@(map (λ (s in)#`(define/public (#,s val) (set! #,in val))) setters internal-ids)))
+           (curry make-object model)))]))
 
 ;; Tests 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -46,8 +48,8 @@
 (module+ test
   (require rackunit)
   
-  (define-model foo% ([bar number?] baz))
-  (define test (make-object foo% 0 0))
+  (define-model foo ([bar number?] baz))
+  (define test (foo 0 0))
   
   (check-equal? (send test get-bar) 0)
   (check-equal? (send test get-baz) 0)
@@ -55,5 +57,5 @@
   (send test set-bar! 1)
   (check-equal? (send test get-bar) 1)
   
-    (send test set-baz! 2)
+  (send test set-baz! 2)
   (check-equal? (send test get-baz) 2))
