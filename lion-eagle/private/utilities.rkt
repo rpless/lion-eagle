@@ -1,7 +1,5 @@
 #lang racket
 
-(require (for-syntax racket))
-
 ;; Syntax Utilities
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -11,7 +9,6 @@
 ;; Take a wild guess as to what this function does.
 (define (symbol-append s . rst)
   (string->symbol (apply string-append (map symbol->string (cons s rst)))))
-
 
 (define (extract-id stx)
   (syntax-case stx ()
