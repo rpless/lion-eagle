@@ -6,7 +6,25 @@
 ;; View Module
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(provide component)
+(provide define-view)
+
+(define-syntax (define-view stx)  
+  (syntax-case stx (frame)
+    [(_ (frame framename title comp))
+     #`(let ()
+         (define framename (new frame% [label title]))
+         #,(syntax-case #'comp (textfield)
+           [(textfield name (bind field model->field field->model))
+            #`(begin 
+                (define callback 
+                  (λ (self evt)
+                    (when (eq? (send evt get-event-type) 'text-field-enter)
+                      (#,(datum->syntax stx (symbol-append 'set- (syntax->datum #'field) '!)) (field->model (send self get-value))))))
+                (define initial-value (#,(datum->syntax stx (symbol-append 'get- (syntax->datum #'field)))))
+                (define name (new text-field% [parent framename][label ""][init-value (model->field initial-value)][callback callback]))
+                (#,(datum->syntax stx (symbol-append 'add-notifier: (syntax->datum #'field)))
+                 (λ (new-value) (send name set-value (model->field new-value)))))])
+         (send framename show #t))]))
 
 ;; The component form supports the following types of UI components:
 ;; - (textfield name (bind field model->textfield textfield->model))
@@ -14,6 +32,7 @@
 ;;   The model->textfield is a function of [X -> String] and the textfield->model is a function
 ;;   of [String -> X]
 ;; - (button name text (action actionname))
+#;
 (define-syntax (component stx)
   (syntax-case stx (frame textfield button vertical-panel
                           horizontal-panel message bind action)
