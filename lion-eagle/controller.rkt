@@ -19,13 +19,19 @@
      #`(begin 
          (define-signature #,(datum->syntax stx cont-name) (#,@members-with-ctx))
          (define #,(datum->syntax stx (symbol-append 'make- cont-name))
-           (λ () 
-             (unit 
-               (import (prefix m: model))
-               (export #,(datum->syntax stx cont-name))
-               
-               #,@(for/list ([m (map syntax->datum members)])
-                    #`(define #,(datum->syntax stx m) #,(datum->syntax stx (symbol-append 'm: m))))))))]))
+           (λ (controller-model) 
+             (compound-unit
+               (import)
+               (export C)
+               (link [((M : model)) controller-model]
+                     [((C : #,(datum->syntax stx cont-name))) 
+                      (unit 
+                        (import (prefix m: model))
+                        (export #,(datum->syntax stx cont-name))
+                        
+                        #,@(for/list ([m (map syntax->datum members)])
+                             #`(define #,(datum->syntax stx m) #,(datum->syntax stx (symbol-append 'm: m)))))
+                      M])))))]))
 
 ;; Tests
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -38,13 +44,7 @@
   (define model (make-foo 0))
   
   (define-controller foo)
-  (define controller
-    (compound-unit
-      (import)
-      (export C)
-      (link [((M : foo)) model]
-            [((C : foo-controller)) (make-foo-controller) M])))
-  (define-values/invoke-unit controller
+  (define-values/invoke-unit (make-foo-controller model)
     (import)
     (export foo-controller))
   
