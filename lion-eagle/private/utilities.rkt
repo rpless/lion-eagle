@@ -3,7 +3,7 @@
 ;; Syntax Utilities
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(provide symbol-append symbol-contains?)
+(provide symbol-append symbol-contains? subsymbol)
 
 ;; Symbol ..+ -> Symbol
 ;; Take a wild guess as to what this function does.
@@ -14,6 +14,11 @@
 ;; is the second symbol contained in the first symbol?
 (define (symbol-contains? src pattern)
   (regexp-match? (symbol->string pattern) (symbol->string src)))
+
+;; Symbol -> Symbol
+;; 
+(define (subsymbol sym start [end (string-length (symbol->string sym))])
+  (string->symbol (substring (symbol->string sym) start end)))
 
 ;; Tests
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -28,4 +33,8 @@
   
   ;; symbol-contains?
   (check-true (symbol-contains? 'get-bar 'get.*))
-  (check-false (symbol-contains? 'get-bar 'set.*)))
+  (check-false (symbol-contains? 'get-bar 'set.*))
+  
+  ;; subsymbol
+  (check-equal? (subsymbol 'abc 1) 'bc)
+  (check-equal? (subsymbol 'abcd 1 3) 'bc))
