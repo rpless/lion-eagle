@@ -10,6 +10,8 @@
 
 (define-syntax (define-view stx) 
   
+  (define ->syntax (curry datum->syntax stx))
+  
   (define (component comp parentname)
       (syntax-case comp (bind textfield message)
         [(textfield name (bind field model->field field->model))
@@ -17,17 +19,17 @@
              (define callback 
                (λ (self evt)
                  (when (eq? (send evt get-event-type) 'text-field-enter)
-                   (#,(datum->syntax stx (symbol-append 'set- (syntax->datum #'field) '!)) (field->model (send self get-value))))))
-             (define initial-value (#,(datum->syntax stx (symbol-append 'get- (syntax->datum #'field)))))
+                   (#,(->syntax (symbol-append 'set- (syntax->datum #'field) '!)) (field->model (send self get-value))))))
+             (define initial-value (#,(->syntax (symbol-append 'get- (syntax->datum #'field)))))
              (define name (new text-field% [parent #,parentname][label ""][init-value (model->field initial-value)][callback callback]))
-             (#,(datum->syntax stx (symbol-append 'add-notifier: (syntax->datum #'field)))
+             (#,(->syntax (symbol-append 'add-notifier: (syntax->datum #'field)))
               (λ (new-value) (send name set-value (model->field new-value)))))]
         [(message name (bind field model->message))
          #`(begin 
              (define name (new message% [parent #,parentname]
-                               [label (model->message (#,(datum->syntax stx (symbol-append 'get- (syntax->datum #'field)))))]
+                               [label (model->message (#,(->syntax (symbol-append 'get- (syntax->datum #'field)))))]
                                [auto-resize #t]))
-             (#,(datum->syntax stx (symbol-append 'add-notifier: (syntax->datum #'field)))
+             (#,(->syntax (symbol-append 'add-notifier: (syntax->datum #'field)))
               (λ (new-value) (send name set-label (model->message new-value)))))]))
   
   (syntax-case stx (frame)
