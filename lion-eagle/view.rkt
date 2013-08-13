@@ -10,8 +10,7 @@
 
 (define-syntax (define-view stx) 
   
-  (define component 
-    (λ (comp parentname)
+  (define (component comp parentname)
       (syntax-case comp (bind textfield message)
         [(textfield name (bind field model->field field->model))
          #`(begin 
@@ -29,7 +28,7 @@
                                [label (model->message (#,(datum->syntax stx (symbol-append 'get- (syntax->datum #'field)))))]
                                [auto-resize #t]))
              (#,(datum->syntax stx (symbol-append 'add-notifier: (syntax->datum #'field)))
-              (λ (new-value) (send name set-label (model->message new-value)))))])))
+              (λ (new-value) (send name set-label (model->message new-value)))))]))
   
   (syntax-case stx (frame)
     [(_ (frame parentname title comp ...))
@@ -61,13 +60,6 @@
      #`(begin 
          (define name (new vertical-panel% [parent parentname]))
          (component control name comp)...)]
-    [(_ control parentname (message name (bind field model->message)))
-     #`(begin 
-         (define name (new message% [parent parentname]
-                           [label (model->message (send control #,(datum->syntax stx (symbol-append 'get- (syntax->datum #'field)))))]
-                           [auto-resize #t]))
-         (send control #,(datum->syntax stx (symbol-append 'add-notifer: (syntax->datum #'field)))
-               (λ (new-value) (send name set-label (model->message new-value)))))]
     [(_ control parentname (button name text (action actionname)))
      #`(define name (new button% [parent parentname]
                          [label text]
