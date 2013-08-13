@@ -8,23 +8,35 @@
 
 (provide define-view)
 
-(define-syntax (define-view stx)  
+(define-syntax (define-view stx) 
+  
+  (define component 
+    (λ (comp parentname)
+      (syntax-case comp (bind textfield message)
+        [(textfield name (bind field model->field field->model))
+         #`(begin 
+             (define callback 
+               (λ (self evt)
+                 (when (eq? (send evt get-event-type) 'text-field-enter)
+                   (#,(datum->syntax stx (symbol-append 'set- (syntax->datum #'field) '!)) (field->model (send self get-value))))))
+             (define initial-value (#,(datum->syntax stx (symbol-append 'get- (syntax->datum #'field)))))
+             (define name (new text-field% [parent #,parentname][label ""][init-value (model->field initial-value)][callback callback]))
+             (#,(datum->syntax stx (symbol-append 'add-notifier: (syntax->datum #'field)))
+              (λ (new-value) (send name set-value (model->field new-value)))))]
+        [(message name (bind field model->message))
+         #`(begin 
+             (define name (new message% [parent #,parentname]
+                               [label (model->message (#,(datum->syntax stx (symbol-append 'get- (syntax->datum #'field)))))]
+                               [auto-resize #t]))
+             (#,(datum->syntax stx (symbol-append 'add-notifier: (syntax->datum #'field)))
+              (λ (new-value) (send name set-label (model->message new-value)))))])))
+  
   (syntax-case stx (frame)
-    [(_ (frame framename title comp))
+    [(_ (frame parentname title comp ...))
      #`(let ()
-         (define framename (new frame% [label title]))
-         #,(syntax-case #'comp (textfield)
-           [(textfield name (bind field model->field field->model))
-            #`(begin 
-                (define callback 
-                  (λ (self evt)
-                    (when (eq? (send evt get-event-type) 'text-field-enter)
-                      (#,(datum->syntax stx (symbol-append 'set- (syntax->datum #'field) '!)) (field->model (send self get-value))))))
-                (define initial-value (#,(datum->syntax stx (symbol-append 'get- (syntax->datum #'field)))))
-                (define name (new text-field% [parent framename][label ""][init-value (model->field initial-value)][callback callback]))
-                (#,(datum->syntax stx (symbol-append 'add-notifier: (syntax->datum #'field)))
-                 (λ (new-value) (send name set-value (model->field new-value)))))])
-         (send framename show #t))]))
+         (define parentname (new frame% [label title]))
+         #,@(map (curryr component #'parentname) (syntax->list #'(comp ...)))
+         (send parentname show #t))]))
 
 ;; The component form supports the following types of UI components:
 ;; - (textfield name (bind field model->textfield textfield->model))
@@ -49,16 +61,6 @@
      #`(begin 
          (define name (new vertical-panel% [parent parentname]))
          (component control name comp)...)]
-    [(_ control parentname (textfield name (bind field model->textfield textfield->model)))
-     #`(begin 
-         (define name (new text-field% [parent parentname]
-                           [label ""]
-                           [callback (λ (self evt) 
-                                       (when (eq? (send evt get-event-type) 'text-field-enter)
-                                         (send control #,(datum->syntax stx (symbol-append 'set- (syntax->datum #'field)))
-                                               (textfield->model (send self get-value)))))]))
-         (send control #,(datum->syntax stx (symbol-append 'add-notifer: (syntax->datum #'field)))
-               (λ (new-value) (send name set-value (model->textfield new-value)))))]
     [(_ control parentname (message name (bind field model->message)))
      #`(begin 
          (define name (new message% [parent parentname]

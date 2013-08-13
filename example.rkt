@@ -13,4 +13,5 @@
   (export foo-controller))
 
 (define-view (frame f "MVC Test"
+                    (message m1 (bind counter number->string))
                     (textfield t1 (bind counter number->string string->number))))
