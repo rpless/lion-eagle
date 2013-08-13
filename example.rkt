@@ -1,16 +1,17 @@
 #lang racket
-(require "lion-eagle/main.rkt")
+(require "lion-eagle/view.rkt" "lion-eagle/model.rkt" "lion-eagle/controller.rkt")
 
 
-(define create-mvc 
-  (mvc (model foo ([counter number?]))
-       (view (frame window "MVC Test"
-                    (vertical-panel vp
-                                    (horizontal-panel hp
-                                                      (message m1 (bind counter number->string))
-                                                      (textfield t1 (bind counter number->string string->number)))
-                                    (button b1 "Click Me" (action increment)))))
-       (controller (increment (send this set-counter (add1 (send this get-counter)))))))
 
-(define-values (control view) (create-mvc 0))
-(send view show #t)
+(define-model foo (counter))
+(define model (make-foo 0))
+
+(define-controller foo)
+(define controller (make-foo-controller model))
+(define-values/invoke-unit (make-foo-controller model)
+  (import)
+  (export foo-controller))
+
+(define-view (frame f "MVC Test"
+                    (message m1 (bind counter number->string))
+                    (textfield t1 (bind counter number->string string->number))))
