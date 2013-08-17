@@ -6,7 +6,7 @@
 (define-model foo (counter))
 (define model (make-foo 0))
 
-(define-controller foo)
+(define-controller foo ((bar (set-counter! (add1 (get-counter))))))
 (define controller (make-foo-controller model))
 (define-values/invoke-unit (make-foo-controller model)
   (import)
@@ -14,4 +14,5 @@
 
 (define-view (frame f "MVC Test"
                     (message m1 (bind counter number->string))
-                    (textfield t1 (bind counter number->string string->number))))
+                    (textfield t1 (bind counter number->string string->number))
+                    (button b1 "Click Me" (action bar))))
