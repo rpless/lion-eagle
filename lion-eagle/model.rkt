@@ -33,7 +33,8 @@
                
                #,@(map (λ (f g) #`(define #,(datum->syntax stx f) #,g)) fields gen-fields)
                #,@(map (λ (f g) #`(define (#,g) #,(datum->syntax stx f))) fields getters)
-               #,@(map (λ (f s) #`(define (#,s val) (set! #,(datum->syntax stx f) val))) fields setters)))))]))
+               #,@(map (λ (f s) #`(define (#,s val) (set! #,(datum->syntax stx f) val)))
+                       fields setters)))))]))
 
 ;; Tests
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
