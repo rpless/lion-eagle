@@ -13,7 +13,7 @@
 (define-syntax (define-controller stx)
   (define (->syntax val) (datum->syntax stx val))
   (syntax-parse stx
-    [(_ model)
+    [(_ model ((action:id impl:expr ...) ...))
      (define-values (ident members defs syntaxe) (signature-members #'model #'model))
      (define member-names (map syntax->datum members))
      (define fields (remove-duplicates (map (curryr subsymbol (string-length "get-")) member-names)))
@@ -22,8 +22,9 @@
      (define getters (map ->syntax sym-getters))
      (define setters (map ->syntax sym-setters))
      (define notifiers (map (compose ->syntax (curry symbol-append 'add-notifier:)) fields))
+     (define action-impl (syntax->list #'((impl ...) ...)))
      #`(begin 
-         (define-signature #,(->syntax cont-name) (#,@getters #,@setters #,@notifiers))
+         (define-signature #,(->syntax cont-name) (#,@getters #,@setters #,@notifiers #,@(syntax->list #'(action ...))))
          (define #,(->syntax (symbol-append 'make- cont-name))
            (λ (controller-model) 
              (define base-unit 
@@ -33,7 +34,11 @@
                  
                  #,@(make-fields-and-notifiers fields notifiers stx)
                  #,@(make-getters sym-getters stx)
-                 #,@(make-setters sym-setters fields stx)))
+                 #,@(make-setters sym-setters fields stx)
+                 
+                 #,@(for/list ([id (syntax->list #'(action ...))]
+                               [imps action-impl])
+                      #`(define (#,id) #,@imps))))
              (compound-unit
                (import)
                (export C)
@@ -74,7 +79,7 @@
   (define-model foo (bar))
   (define model (make-foo 0))
   
-  (define-controller foo)
+  (define-controller foo ())
   (define-values/invoke-unit (make-foo-controller model)
     (import)
     (export foo-controller))

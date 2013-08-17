@@ -6,7 +6,7 @@
 (define-model foo (counter))
 (define model (make-foo 0))
 
-(define-controller foo)
+(define-controller foo ((bar 3) (baz 6)))
 (define controller (make-foo-controller model))
 (define-values/invoke-unit (make-foo-controller model)
   (import)
