@@ -31,25 +31,38 @@
                  (import (prefix m: model))
                  (export #,(->syntax cont-name))
                  
-                 #,@(for/list ([f fields])
-                      #`(begin 
-                          (define #,(->syntax (symbol-append 'notifier: f)) '())
-                          (define (#,(->syntax (symbol-append 'add-notifier: f)) notifier)
-                            #,(let ([not-name (->syntax (symbol-append 'notifier: f))])
-                                #`(set! #,not-name (cons notifier #,not-name))))))
-                 
-                 #,@(for/list ([g sym-getters])
-                      #`(define #,(->syntax g) #,(->syntax (symbol-append 'm: g))))
-                 #,@(for/list ([s sym-setters][f fields])
-                      #`(define (#,(->syntax s) val)
-                          (#,(->syntax (symbol-append 'm: s)) val)
-                          (for ([n #,(->syntax (symbol-append 'notifier: f))])
-                            (n val))))))
+                 #,@(make-fields-and-notifiers fields notifiers stx)
+                 #,@(make-getters sym-getters stx)
+                 #,@(make-setters sym-setters fields stx)))
              (compound-unit
                (import)
                (export C)
                (link [((M : model)) controller-model]
                      [((C : #,(->syntax cont-name))) base-unit M])))))]))
+
+;; [Listof Symbol] [Listof Syntax] Syntax -> [Listof Syntax]
+;; Create the syntax objects for notifiers and add-notifiers for each field.
+(define-for-syntax (make-fields-and-notifiers fields add-notifiers stx)
+  (for/list ([f fields][n add-notifiers])
+    (define notifier-field (datum->syntax stx (symbol-append 'notifier: f)))
+    #`(begin 
+        (define #,notifier-field '())
+        (define (#,n notifier) (set! #,notifier-field (cons notifier #,notifier-field))))))
+
+;; [Listof Symbol] Syntax -> [Listof Syntax] 
+;; create the syntax objects for all of the given getter names.
+(define-for-syntax (make-getters getter-names stx)
+  (for/list ([g getter-names])
+    #`(define #,(datum->syntax stx g) #,(datum->syntax stx (symbol-append 'm: g)))))
+
+;; [Listof Symbol] [Listof Symbol] Syntax -> [Listof Syntax]
+;; create the syntax objects for the given setter names.
+(define-for-syntax (make-setters setter-names fields stx)
+  (for/list ([s setter-names][f fields])
+    #`(define (#,(datum->syntax stx s) val)
+        (#,(datum->syntax stx (symbol-append 'm: s)) val)
+        (for ([n #,(datum->syntax stx (symbol-append 'notifier: f))])
+          (n val)))))
 
 ;; Tests
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -65,12 +78,13 @@
   (define-values/invoke-unit (make-foo-controller model)
     (import)
     (export foo-controller))
-  
-  (add-notifier:bar (λ (v) (displayln (~a "The new value is " v "."))))
+  (define output-string (open-output-string))
+  (add-notifier:bar (λ (v) (display (~a "The new value is " v ".") output-string)))
   
   ;; getters
   (check-equal? (get-bar) 0)
   
   ;; setters
   (check-pred void? (set-bar! 1))
-  (check-equal? (get-bar) 1))
+  (check-equal? (get-bar) 1)
+  (check-equal? (get-output-string output-string) "The new value is 1."))
