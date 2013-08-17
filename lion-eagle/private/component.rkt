@@ -13,15 +13,24 @@
 
 (define-for-syntax (component comp parentname stx)
   (define ->syntax (curry datum->syntax stx))
-  (syntax-case comp (bind textfield message)
+  (syntax-case comp (bind action textfield message button)
     [(textfield name (bind field model->field field->model))
      (create-textfield #'name #'field parentname #'model->field #'field->model stx)]
     [(message name (bind field model->message))
-     (create-message #'name #'field parentname #'model->message stx)]))
+     (create-message #'name #'field parentname #'model->message stx)]
+    [(button name text (action id))
+     (create-button #'name parentname #'text #'id)]))
 
 
 ;; Gui Components
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define-for-syntax (create-button name parentname text action)
+  #`(define name (new button% [parent #,parentname]
+                      [label #,text]
+                      [callback (λ (self evt)
+                                  (when (eq? (send evt get-event-type) 'button)
+                                    (#,action)))])))
 
 (define-for-syntax (create-textfield name field parentname model->field field->model stx)
   (define ->syntax (curry datum->syntax stx))
