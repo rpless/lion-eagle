@@ -8,7 +8,7 @@
 
 (define-controller foo ((bar (set-counter! (add1 (get-counter))))))
 (define controller (make-foo-controller model))
-(define-values/invoke-unit (make-foo-controller model)
+(define-values/invoke-unit controller
   (import)
   (export foo-controller))
 

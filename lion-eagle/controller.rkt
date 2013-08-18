@@ -23,8 +23,9 @@
      (define setters (map ->syntax sym-setters))
      (define notifiers (map (compose ->syntax (curry symbol-append 'add-notifier:)) fields))
      (define action-impl (syntax->list #'((impl ...) ...)))
+     (define action-ids (syntax->list #'(action ...)))
      #`(begin 
-         (define-signature #,(->syntax cont-name) (#,@getters #,@setters #,@notifiers #,@(syntax->list #'(action ...))))
+         (define-signature #,(->syntax cont-name) (#,@getters #,@setters #,@notifiers #,@action-ids))
          (define #,(->syntax (symbol-append 'make- cont-name))
            (λ (controller-model) 
              (define base-unit 
@@ -35,10 +36,7 @@
                  #,@(make-fields-and-notifiers fields notifiers stx)
                  #,@(make-getters sym-getters stx)
                  #,@(make-setters sym-setters fields stx)
-                 
-                 #,@(for/list ([id (syntax->list #'(action ...))]
-                               [imps action-impl])
-                      #`(define (#,id) #,@imps))))
+                 #,@(make-actions action-ids action-impl)))
              (compound-unit
                (import)
                (export C)
@@ -68,6 +66,10 @@
         (#,(datum->syntax stx (symbol-append 'm: s)) val)
         (for ([n #,(datum->syntax stx (symbol-append 'notifier: f))])
           (n val)))))
+
+(define-for-syntax (make-actions actions impls)
+  (for/list ([id actions] [imps impls])
+    #`(define (#,id) #,@imps)))
 
 ;; Tests
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
