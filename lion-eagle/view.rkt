@@ -6,12 +6,12 @@
 ;; View Module
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(provide define-view)
+(provide view)
 
-(define-syntax (define-view stx)   
+(define-syntax (view stx)   
   (syntax-case stx (frame)
     [(_ (frame parentname title comp ...))
-     #`(let ()
+     #`(lambda ()
          (define parentname (new frame% [label title]))
          #,@(map (curryr component #'parentname stx) (syntax->list #'(comp ...)))
          (send parentname show #t))]))
