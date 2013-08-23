@@ -1,6 +1,6 @@
 #lang racket
 
 (require "../lion-eagle/model.rkt")
-(provide foo make-foo)
+(provide count-model make-count-model)
 
-(define-model foo (counter))
+(define-model count-model (count))
