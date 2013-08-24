@@ -42,6 +42,20 @@ Here, we define a model called count-model. It has a field called count. For our
 Although contracts are not currently supported, something is in the works for this.
 
 @subsection{The Controller}
+@defmodule["lion-eagle/controller.rkt"]
+
+The controller module provides a form for creating a model's controller.
+
+@defform[(define-controller id action ...)
+         #:grammar ([action (define/action (id arg ...) body ...)])]
+
+@subsection{The View}
+@defmodule["lion-eagle/view.rkt"]
+
+The view module provides a form for creating heirarchical Graphical User Interfaces.
+
+
+
 
             
             
