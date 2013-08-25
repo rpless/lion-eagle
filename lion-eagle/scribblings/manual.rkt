@@ -1,5 +1,7 @@
 #lang scribble/manual
 
+
+
 @title{Lion-Eagle}
 @author+email["Ryan Plessner" "rpless@ccs.neu.edu"]
 
@@ -54,8 +56,15 @@ The controller module provides a form for creating a model's controller.
 
 The view module provides a form for creating heirarchical Graphical User Interfaces.
 
+@defform[(view controller-id (frame id title subcomponents ...))
+         #:grammar ([subcomponents (message id (bind field model->string))
+                                   (button id (action action-id))
+                                   (textfield id (bind field model->string string->model))])]
 
+The view form creates a unit that imports the controller specified by controller-id.
+The unit exports a @racket[view-factory^]
 
+@defsignature[view-factory^ ()]
 
             
             
